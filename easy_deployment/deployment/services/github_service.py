@@ -65,6 +65,13 @@ class GitHubService:
     def detect_framework(self, repo_dir):
         """Detect the framework used in the repository"""
         files = os.listdir(repo_dir)
+        
+        # Check for LAMP stack
+        if 'composer.json' in files or any(f.endswith('.php') for f in files):
+            if os.path.exists(os.path.join(repo_dir, 'public', '.htaccess')):
+                return 'lamp'
+            return 'php'
+        
         package_json_path = os.path.join(repo_dir, 'package.json')
         
         if 'package.json' in files:

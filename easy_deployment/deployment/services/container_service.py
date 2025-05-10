@@ -127,6 +127,44 @@ ENV PORT=8000
 EXPOSE 8000
 CMD ["node", "server/index.js"]
                 """)
+            elif framework == 'lamp':
+                f.write("""
+FROM php:8.0-apache
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    zip \
+    unzip
+
+# Install PHP extensions
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+
+# Enable Apache modules
+RUN a2enmod rewrite
+
+# Set working directory
+WORKDIR /var/www/html
+
+# Copy application files
+COPY . .
+
+# Copy public files to Apache root
+RUN cp -r public/* . && rm -rf public
+
+# Set permissions
+RUN chown -R www-data:www-data /var/www/html
+
+# Apache configuration
+ENV APACHE_DOCUMENT_ROOT /var/www/html
+
+EXPOSE 80
+CMD ["apache2-foreground"]
+                """)
             else:
                 # Generic fallback
                 f.write("""

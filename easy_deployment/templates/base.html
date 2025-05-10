@@ -60,11 +60,343 @@
             align-items: center;
             margin: 20px 0;
         }
+        .docs-section {
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .step-guide {
+            counter-reset: step;
+            padding-left: 0;
+        }
+        .step-guide li {
+            list-style: none;
+            position: relative;
+            padding: 15px 0 15px 50px;
+            border-left: 2px solid #007bff;
+            margin-left: 20px;
+        }
+        .step-guide li:before {
+            counter-increment: step;
+            content: counter(step);
+            background: #007bff;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            left: -16px;
+        }
+        .code-block {
+            background: #2d2d2d;
+            color: #fff;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin: 10px 0;
+        }
+        .deployment-tips {
+            background: #e7f5ff;
+            padding: 15px;
+            border-left: 4px solid #007bff;
+            margin: 15px 0;
+        }
+        .nav-menu {
+            background: #343a40;
+            padding: 10px;
+            margin: -20px -20px 20px;
+            border-radius: 8px 8px 0 0;
+        }
+        .nav-menu a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 15px;
+            display: inline-block;
+        }
+        .nav-menu a:hover {
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <nav class="nav-menu">
+            <a href="{% url 'dashboard' %}">Dashboard</a>
+            <a href="#" onclick="showDeploymentGuide()">Deployment Guide</a>
+            <a href="#" onclick="showMERNGuide()">MERN Guide</a>
+            <a href="#" onclick="showLAMPGuide()">LAMP Guide</a>
+        </nav>
+        
         {% block content %}{% endblock %}
+
+        <!-- MERN Stack Deployment Guide -->
+        <div id="mernGuide" class="docs-section" style="display: none;">
+            <h2>MERN Stack Deployment Guide</h2>
+            
+            <div class="deployment-tips">
+                <h3>Quick Start</h3>
+                <ol>
+                    <li>Sign up and log in to Easy Deployment</li>
+                    <li>Click "New Project" on the dashboard</li>
+                    <li>Choose either:
+                        <ul>
+                            <li>Connect GitHub and select your repository</li>
+                            <li>Upload your project as a ZIP file</li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+
+            <ol class="step-guide">
+                <li>
+                    <h3>Prepare Your MERN Project</h3>
+                    <div class="code-block">
+                        my-mern-app/
+                        ├── package.json         # Main package.json
+                        ├── server/
+                        │   ├── index.js        # Express server
+                        │   ├── models/         # Mongoose models
+                        │   └── routes/         # API routes
+                        ├── src/                # React frontend
+                        │   ├── App.js
+                        │   └── components/
+                        ├── .env                # Environment variables
+                        └── .gitignore
+                    </div>
+                    
+                    <div class="deployment-tips">
+                        <strong>package.json example:</strong>
+                        <div class="code-block">
+{
+  "name": "my-mern-app",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node server/index.js",
+    "build": "react-scripts build",
+    "dev": "react-scripts start"
+  },
+  "dependencies": {
+    "express": "^4.18.0",
+    "mongoose": "^7.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-scripts": "5.0.1"
+  }
+}
+                        </div>
+                    </div>
+                </li>
+
+                <li>
+                    <h3>Configure Environment Variables</h3>
+                    <div class="code-block">
+# Required environment variables
+MONGODB_URI=mongodb+srv://your-connection-string
+PORT=8000
+NODE_ENV=production
+
+# Optional variables
+JWT_SECRET=your-secret-key
+REACT_APP_API_URL=/api
+                    </div>
+                </li>
+
+                <li>
+                    <h3>Express Server Setup</h3>
+                    <div class="code-block">
+// server/index.js
+const express = require('express');
+const mongoose = require('mongoose');
+const path = require('path');
+
+const app = express();
+app.use(express.json());
+
+// Serve static files from React build
+app.use(express.static(path.join(__dirname, '../build')));
+
+// API routes
+app.use('/api', require('./routes'));
+
+// Handle React routing
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../build/index.html'));
+});
+
+const PORT = process.env.PORT || 8000;
+app.listen(PORT);
+                    </div>
+                </li>
+
+                <li>
+                    <h3>Deploy Your Project</h3>
+                    <div class="deployment-tips">
+                        <strong>Method 1: GitHub</strong>
+                        <ol>
+                            <li>Push your code to GitHub</li>
+                            <li>Connect GitHub account to Easy Deployment</li>
+                            <li>Select repository and branch</li>
+                            <li>Add MongoDB connection string</li>
+                            <li>Click Deploy</li>
+                        </ol>
+
+                        <strong>Method 2: Direct Upload</strong>
+                        <ol>
+                            <li>Zip your project directory</li>
+                            <li>Click "Upload Project" in dashboard</li>
+                            <li>Select the ZIP file</li>
+                            <li>Add MongoDB connection string</li>
+                            <li>Click Deploy</li>
+                        </ol>
+                    </div>
+                </li>
+            </ol>
+
+            <div class="deployment-tips">
+                <h3>Deployment Checklist</h3>
+                <ul>
+                    <li>✓ Frontend built with 'npm run build'</li>
+                    <li>✓ MongoDB connection string ready</li>
+                    <li>✓ Environment variables configured</li>
+                    <li>✓ Express server handles static files</li>
+                    <li>✓ All dependencies listed in package.json</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- LAMP Stack Deployment Guide -->
+        <div id="lampGuide" class="docs-section" style="display: none;">
+            <h2>LAMP Stack Deployment Guide</h2>
+            
+            <div class="deployment-tips">
+                <h3>Quick Start</h3>
+                <ol>
+                    <li>Package your LAMP project</li>
+                    <li>Upload or connect GitHub repository</li>
+                    <li>Configure environment variables</li>
+                    <li>Deploy your application</li>
+                </ol>
+            </div>
+
+            <ol class="step-guide">
+                <li>
+                    <h3>Project Structure</h3>
+                    <div class="code-block">
+my-lamp-app/
+├── public/              # Web root directory
+│   ├── index.php       # Entry point
+│   ├── assets/         # CSS, JS, images
+│   └── .htaccess      # Apache config
+├── app/
+│   ├── config/        # Database configuration
+│   ├── models/        # PHP model classes
+│   └── controllers/   # PHP controllers
+├── database/
+│   └── migrations/    # SQL migration files
+└── composer.json      # PHP dependencies
+                    </div>
+                    
+                    <div class="deployment-tips">
+                        <strong>composer.json example:</strong>
+                        <div class="code-block">
+{
+    "name": "my-lamp-app",
+    "require": {
+        "php": ">=7.4",
+        "mysql": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    }
+}
+                        </div>
+                    </div>
+                </li>
+
+                <li>
+                    <h3>Database Configuration</h3>
+                    <div class="code-block">
+// app/config/database.php
+<?php
+return [
+    'host' => getenv('DB_HOST'),
+    'database' => getenv('DB_NAME'),
+    'username' => getenv('DB_USER'),
+    'password' => getenv('DB_PASSWORD')
+];
+                    </div>
+                </li>
+
+                <li>
+                    <h3>Apache Configuration</h3>
+                    <div class="code-block">
+# public/.htaccess
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [QSA,L]
+
+php_value upload_max_filesize 64M
+php_value post_max_size 64M
+php_value max_execution_time 300
+                    </div>
+                </li>
+
+                <li>
+                    <h3>Environment Variables</h3>
+                    <div class="code-block">
+# Required variables
+DB_HOST=your-mysql-host
+DB_NAME=your-database
+DB_USER=your-username
+DB_PASSWORD=your-password
+
+# Optional variables
+APP_ENV=production
+APP_DEBUG=false
+APP_KEY=your-app-key
+                    </div>
+                </li>
+            </ol>
+
+            <div class="deployment-tips">
+                <h3>Deployment Checklist</h3>
+                <ul>
+                    <li>✓ PHP version >= 7.4</li>
+                    <li>✓ MySQL credentials ready</li>
+                    <li>✓ Apache configurations set</li>
+                    <li>✓ Proper file permissions</li>
+                    <li>✓ Database migrations prepared</li>
+                </ul>
+            </div>
+        </div>
     </div>
+
+    <script>
+        function showDeploymentGuide() {
+            document.getElementById('mernGuide').style.display = 'none';
+            document.getElementById('lampGuide').style.display = 'none';
+            // Add general deployment guide toggle here
+        }
+
+        function showMERNGuide() {
+            document.getElementById('lampGuide').style.display = 'none';
+            document.getElementById('mernGuide').style.display = 
+                document.getElementById('mernGuide').style.display === 'none' ? 'block' : 'none';
+        }
+
+        function showLAMPGuide() {
+            document.getElementById('mernGuide').style.display = 'none';
+            document.getElementById('lampGuide').style.display = 
+                document.getElementById('lampGuide').style.display === 'none' ? 'block' : 'none';
+        }
+    </script>
 </body>
 </html>
