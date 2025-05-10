@@ -31,7 +31,7 @@ INSTALLED_APPS = [
     
     # Local apps
     'deployment',
-    'frontend',
+    'frontend',  # Add this if the frontend app exists
 ]
 
 MIDDLEWARE = [
@@ -50,7 +50,7 @@ ROOT_URLCONF = 'easy_deployment.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],  # Ensure this points to the templates directory
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -101,7 +101,10 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = 'static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static') if os.path.exists(os.path.join(BASE_DIR, 'static')) else None
+]
+STATICFILES_DIRS = [d for d in STATICFILES_DIRS if d]  # Remove None values
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
