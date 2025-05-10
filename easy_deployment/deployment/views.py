@@ -6,6 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from django.urls import reverse
 from django.contrib import messages
+from django.views.decorators.http import require_http_methods
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -14,6 +15,7 @@ from .models import GithubAccount, Project, Deployment, Environment
 from .serializers import ProjectSerializer, DeploymentSerializer, EnvironmentVariableSerializer
 from .services.github_service import GitHubService
 from .services.deployment_service import DeploymentService
+from .services.local_project_service import LocalProjectService
 
 @login_required
 def dashboard(request):
@@ -107,6 +109,58 @@ def project_detail(request, project_id):
         'deployments': deployments,
         'environments': environments
     })
+
+@login_required
+@require_http_methods(["POST"])
+def upload_project(request):
+    """Handle project file uploads"""
+    try:
+        if 'project_file' not in request.FILES:
+            return JsonResponse({'error': 'No file uploaded'}, status=400)
+            
+        project_file = request.FILES['project_file']
+        if not project_file.name.endswith('.zip'):
+            return JsonResponse({'error': 'Only ZIP files are supported'}, status=400)
+        
+        service = LocalProjectService()
+        result = service.handle_upload(project_file, request.user)
+        
+        if result['valid']:
+            project = service.create_project(
+                result['temp_dir'],
+                request.POST.get('name', project_file.name.replace('.zip', '')),
+                request.user,
+                result['framework']
+            )
+            return JsonResponse({
+                'success': True,
+                'project_id': project.id,
+                'redirect_url': reverse('project_detail', args=[project.id])
+            })
+        
+        return JsonResponse({'error': 'Invalid project structure'}, status=400)
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@login_required
+def validate_project(request):
+    """Validate project files before upload"""
+    try:
+        if 'project_file' not in request.FILES:
+            return JsonResponse({'error': 'No file uploaded'}, status=400)
+            
+        project_file = request.FILES['project_file']
+        service = LocalProjectService()
+        result = service.handle_upload(project_file, request.user)
+        
+        return JsonResponse({
+            'valid': result['valid'],
+            'framework': result['framework']
+        })
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
 
 class ProjectViewSet(viewsets.ModelViewSet):
     serializer_class = ProjectSerializer

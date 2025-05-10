@@ -97,6 +97,18 @@ Ensure Docker is running and accessible:
 docker ps
 ```
 
+## Troubleshooting
+
+### Common Issues
+
+1. **TemplateDoesNotExist Error**:
+   - Ensure the `login.html` template exists in the correct directory: `easy_deployment/templates/registration/`.
+   - Verify that the `DIRS` setting in `TEMPLATES` in `settings.py` includes the `templates` directory:
+     ```python
+     'DIRS': [os.path.join(BASE_DIR, 'templates')],
+     ```
+   - Restart the development server after making changes.
+
 ## License
 
 This project is licensed under the MIT License.

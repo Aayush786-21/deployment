@@ -8,11 +8,14 @@ urlpatterns = [
     path('', include('deployment.urls')),
     
     # Authentication URLs
-    path('accounts/login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
+    path('accounts/login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
     path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),
     
     # API URLs
     path('api-auth/', include('rest_framework.urls')),
+    
+    # Project Upload URLs
+    path('projects/upload/', include('deployment.upload_urls')),
     
     # Default to dashboard if no URL matches
     path('', RedirectView.as_view(url='dashboard', permanent=False)),

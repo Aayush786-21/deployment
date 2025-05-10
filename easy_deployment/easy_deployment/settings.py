@@ -30,8 +30,8 @@ INSTALLED_APPS = [
     'corsheaders',
     
     # Local apps
-    'deployment',
-    'frontend',  # Add this if the frontend app exists
+    'deployment.apps.DeploymentConfig',
+    'frontend',
 ]
 
 MIDDLEWARE = [
