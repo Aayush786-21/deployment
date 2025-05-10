@@ -37,7 +37,13 @@ def dashboard(request):
 @login_required
 def github_login(request):
     """Redirect to GitHub OAuth flow"""
-    github_auth_url = f"https://github.com/login/oauth/authorize?client_id={settings.GITHUB_CLIENT_ID}&scope=repo"
+    github_auth_url = (
+        'https://github.com/login/oauth/authorize?'
+        f'client_id={settings.GITHUB_CLIENT_ID}&'
+        f'redirect_uri={settings.GITHUB_REDIRECT_URI}&'
+        f'scope={settings.GITHUB_SCOPES}&'
+        'response_type=code'
+    )
     return redirect(github_auth_url)
 
 @login_required
@@ -56,13 +62,13 @@ def github_callback(request):
     
     try:
         # Exchange code for access token
-        import requests
         response = requests.post(
             'https://github.com/login/oauth/access_token',
             data={
                 'client_id': settings.GITHUB_CLIENT_ID,
                 'client_secret': settings.GITHUB_CLIENT_SECRET,
-                'code': code
+                'code': code,
+                'redirect_uri': settings.GITHUB_REDIRECT_URI
             },
             headers={'Accept': 'application/json'}
         )
@@ -71,13 +77,16 @@ def github_callback(request):
         access_token = data.get('access_token')
         
         if not access_token:
-            messages.error(request, "Failed to get access token from GitHub")
+            messages.error(request, f"Failed to get access token: {data.get('error_description', 'Unknown error')}")
             return redirect('dashboard')
         
         # Get user info
         user_response = requests.get(
             'https://api.github.com/user',
-            headers={'Authorization': f'token {access_token}'}
+            headers={
+                'Authorization': f'Bearer {access_token}',
+                'Accept': 'application/json'
+            }
         )
         github_user = user_response.json()
         

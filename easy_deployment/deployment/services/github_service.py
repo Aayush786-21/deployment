@@ -2,6 +2,7 @@ import os
 import requests
 import tempfile
 import subprocess
+import json
 from django.conf import settings
 import logging
 
@@ -64,18 +65,20 @@ class GitHubService:
     def detect_framework(self, repo_dir):
         """Detect the framework used in the repository"""
         files = os.listdir(repo_dir)
+        package_json_path = os.path.join(repo_dir, 'package.json')
         
-        # Check for Python frameworks
-        if 'requirements.txt' in files or 'Pipfile' in files:
-            if 'manage.py' in files:
-                return 'python-django'
-            elif 'app.py' in files or any(f.endswith('.py') for f in files):
-                return 'python-flask'
-        
-        # Check for Node.js frameworks
         if 'package.json' in files:
-            with open(os.path.join(repo_dir, 'package.json'), 'r') as f:
+            with open(package_json_path, 'r') as f:
                 package_data = f.read()
+                dependencies = json.loads(package_data).get('dependencies', {})
+                
+                # Check for MERN stack
+                if ('express' in dependencies and 
+                    'mongoose' in dependencies and 
+                    'react' in dependencies):
+                    return 'mern'
+                
+                # Check for Node.js frameworks
                 if 'next' in package_data:
                     return 'node-next'
                 elif 'react' in package_data:
@@ -84,6 +87,13 @@ class GitHubService:
                     return 'node-vue'
                 else:
                     return 'node'
+        
+        # Check for Python frameworks
+        if 'requirements.txt' in files or 'Pipfile' in files:
+            if 'manage.py' in files:
+                return 'python-django'
+            elif 'app.py' in files or any(f.endswith('.py') for f in files):
+                return 'python-flask'
         
         # Check for Java frameworks
         if 'pom.xml' in files:

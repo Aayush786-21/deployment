@@ -94,6 +94,39 @@ CMD ["java", "-jar", "app.jar"]
 FROM nginx:alpine
 COPY . /usr/share/nginx/html
                 """)
+            elif framework == 'mern':
+                f.write("""
+FROM node:16-alpine as builder
+
+WORKDIR /app
+
+# Install dependencies for both frontend and backend
+COPY package*.json ./
+RUN npm install
+
+# Copy source files
+COPY . .
+
+# Build React frontend
+RUN npm run build
+
+# Production stage
+FROM node:16-alpine
+WORKDIR /app
+
+# Copy backend dependencies
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/build ./build
+COPY --from=builder /app/server ./server
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV PORT=8000
+
+EXPOSE 8000
+CMD ["node", "server/index.js"]
+                """)
             else:
                 # Generic fallback
                 f.write("""
@@ -152,6 +185,16 @@ CMD ["bash", "-c", "echo 'Application running. Configure container as needed.' &
                 'DEPLOYMENT_ID': str(deployment_id),
                 'PROJECT_NAME': project_name
             })
+            
+            # Add MERN-specific environment variables
+            if framework == 'mern':
+                env_vars.update({
+                    'MONGODB_URI': environment.get('MONGODB_URI', 'mongodb://localhost:27017/app'),
+                    'JWT_SECRET': environment.get('JWT_SECRET', 'default-secret'),
+                    'NODE_ENV': 'production',
+                    'PORT': '8000',
+                    'REACT_APP_API_URL': f"https://{safe_project_name}.{self.deployment_domain}"
+                })
             
             # Run the container
             logs.append(f"Starting container {safe_project_name} on port {container_port}")

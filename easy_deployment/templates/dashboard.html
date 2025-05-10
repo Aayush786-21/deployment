@@ -109,6 +109,21 @@
                     </div>
                 </form>
             </div>
+
+            <div class="framework-info" id="mernInfo" style="display: none;">
+                <h4>MERN Stack Project Requirements:</h4>
+                <ul>
+                    <li>package.json in root directory</li>
+                    <li>Express backend in /server directory</li>
+                    <li>React frontend build script configured</li>
+                    <li>MongoDB connection string in environment variables</li>
+                </ul>
+                <div class="form-group">
+                    <label for="mongoUri">MongoDB URI:</label>
+                    <input type="text" id="mongoUri" name="environment[MONGODB_URI]" 
+                           placeholder="mongodb://localhost:27017/myapp">
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -184,6 +199,20 @@ document.getElementById('projectUploadForm').addEventListener('submit', async fu
         alert('Upload failed');
     }
 });
+
+async function validateProject(data) {
+    const response = await fetch('/api/projects/validate/', {
+        method: 'POST',
+        body: data
+    });
+    const result = await response.json();
+    
+    if (result.framework === 'mern') {
+        document.getElementById('mernInfo').style.display = 'block';
+    }
+    
+    return result;
+}
 </script>
 
 <style>

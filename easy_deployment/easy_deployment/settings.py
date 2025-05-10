@@ -130,8 +130,10 @@ LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 
 # GitHub OAuth settings
-GITHUB_CLIENT_ID = os.getenv('GITHUB_CLIENT_ID', '')
-GITHUB_CLIENT_SECRET = os.getenv('GITHUB_CLIENT_SECRET', '')
+GITHUB_CLIENT_ID = os.getenv('GITHUB_CLIENT_ID')
+GITHUB_CLIENT_SECRET = os.getenv('GITHUB_CLIENT_SECRET')
+GITHUB_REDIRECT_URI = 'http://127.0.0.1:8000/github/callback/'
+GITHUB_SCOPES = 'repo read:user user:email'
 
 # Deployment settings
 BASE_CONTAINER_PORT = int(os.getenv('BASE_CONTAINER_PORT', '8000'))
